@@ -33,8 +33,34 @@ class VisualOdometryDataset(Dataset):
                 ground_truth_data = self.read_ground_truth(aux_path)
                 interpolated_ground_truth = self.interpolate_ground_truth(
                     rgb_paths, ground_truth_data)
-
+                
             # TODO: create sequences
+
+            
+    
+            for i in range(1, len(rgb_paths), 1):
+
+                if not validation:
+                    gt = [
+                        interpolated_ground_truth[i][1][0] - interpolated_ground_truth[i-1][1][0],
+                        interpolated_ground_truth[i][1][1] - interpolated_ground_truth[i-1][1][1],
+                        interpolated_ground_truth[i][1][2] - interpolated_ground_truth[i-1][1][2],
+                        interpolated_ground_truth[i][1][3] - interpolated_ground_truth[i-1][1][3],
+                        interpolated_ground_truth[i][1][4] - interpolated_ground_truth[i-1][1][4],
+                        interpolated_ground_truth[i][1][5] - interpolated_ground_truth[i-1][1][5],
+                        interpolated_ground_truth[i][1][6] - interpolated_ground_truth[i-1][1][6]]
+                     
+                if validation:
+                    gt = []
+
+                self.sequences.append(
+                    [
+                     rgb_paths[i][0], # timestamp
+                     rgb_paths[i-1][1], # image i-1
+                     rgb_paths[i][1], # image i
+                     gt # ground truth
+                    ]
+                )
 
         self.transform = transform
         self.sequence_length = sequence_length
@@ -51,6 +77,53 @@ class VisualOdometryDataset(Dataset):
         timestampt = 0
 
         # TODO: return the next sequence
+
+        sequence = self.sequences[idx]
+
+        timestampt = sequence[0]
+
+        rgb_img1 = cv2.imread(sequence[1])
+        rgb_img1 = cv2.cvtColor(rgb_img1, cv2.COLOR_BGR2RGB)
+        rgb_img1 = self.transform(rgb_img1)
+
+        rgb_img2 = cv2.imread(sequence[2])
+        rgb_img2 = cv2.cvtColor(rgb_img2, cv2.COLOR_BGR2RGB)
+        rgb_img2 = self.transform(rgb_img2)
+
+        sequence_images = torch.stack([rgb_img1, rgb_img2])
+
+        # Get ground truth translation
+
+        ground_truth_pos = torch.FloatTensor(sequence[3])
+
+        # if not self.validation:
+        #     ground_truth_pos = torch.FloatTensor([
+        #         sequence[3][self.sequence_length - 1][0] -
+        #         sequence[3][self.sequence_length - 2][0],
+
+        #         sequence[3][self.sequence_length - 1][1] -
+        #         sequence[3][self.sequence_length - 2][1],
+
+        #         sequence[3][self.sequence_length - 1][2] -
+        #         sequence[3][self.sequence_length - 2][2],
+
+        #         sequence[3][self.sequence_length - 1][3] -
+        #         sequence[3][self.sequence_length - 2][3],
+
+        #         sequence[3][self.sequence_length - 1][4] -
+        #         sequence[3][self.sequence_length - 2][4],
+
+        #         sequence[3][self.sequence_length - 1][5] -
+        #         sequence[3][self.sequence_length - 2][5],
+
+        #         sequence[3][self.sequence_length - 1][6] -
+        #         sequence[3][self.sequence_length - 2][6]
+        #     ])
+        # else:
+        #     ground_truth_pos = torch.FloatTensor([])
+
+        # Get timestamp
+        timestampt = self.sequences[idx][0]
 
         return sequence_images, ground_truth_pos, timestampt
 

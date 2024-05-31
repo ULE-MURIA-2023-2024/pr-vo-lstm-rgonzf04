@@ -44,3 +44,15 @@ $ python3 val.py
 ## Results
 
 Put your results here showing the graphs got from [TUM online validation tool](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/online_evaluation).
+
+- Entrenamiento usando LSTM con hidden_size=2000, num_layers=3, bidirectional=True, lstm_dropout=0.3; sequence_length=2, batch_size=32; learning_rate=0.0001, epochs=1. El conjunto de validación utilizado es rgbd_dataset_freiburg3_walking_rpy_validation.
+
+![Validación 1](./images/val1.png)
+
+- Entrenamiento usando LSTM con hidden_size=1000, num_layers=3, bidirectional=True, lstm_dropout=0.2; sequence_length=2, batch_size=32; learning_rate=0.0001, epochs=1. El conjunto de validación utilizado es rgbd_dataset_freiburg3_walking_rpy_validation.
+
+![Validación 2](./images/val2.png)
+
+- Entrenamiento usando LSTM con hidden_size=1500, num_layers=3, bidirectional=True, lstm_dropout=0.15; sequence_length=2, batch_size=32; learning_rate=0.0001, epochs=1. El conjunto de validación utilizado es rgbd_dataset_freiburg3_walking_rpy_validation.
+
+![Validación 3](./images/val3.png)

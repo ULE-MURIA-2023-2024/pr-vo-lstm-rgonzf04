@@ -28,7 +28,24 @@ class VisualOdometryModel(nn.Module):
 
         # TODO: create the LSTM
 
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.nsm = nn.LSTM(
+            resnet_output,
+            hidden_size,
+            num_layers,
+            batch_first=True,
+            bidirectional=bidirectional,
+            dropout=lstm_dropout
+        )
+
         # TODO: create the FC to generate the translation (3) and rotation (4)
+
+        self.fc = nn.Sequential(
+            nn.Linear(hidden_size * pow(2, int(bidirectional)), hidden_size),
+            nn.ReLU(True),
+            nn.Linear(hidden_size, 7)
+        )
 
     def resnet_transforms(self) -> Callable:
         return weights.DEFAULT.transforms(antialias=True)
@@ -44,5 +61,9 @@ class VisualOdometryModel(nn.Module):
 
         # TODO: use the LSTM
 
+        features = features.view(batch_size, seq_length, -1)
+        lstm_out, _ = self.nsm(features)
+
         # TODO: Get the output of the last time step
-        return ...
+
+        return self.fc(lstm_out[:, -1, :])
